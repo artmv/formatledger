@@ -1,0 +1,193 @@
+Sub FormatLedger()
+
+'Step Copy Sheet1
+    Sheets("Sheet1").Select
+    Sheets("Sheet1").Copy Before:=Sheets(1)
+    Sheets("Sheet1 (2)").Select
+    Sheets("Sheet1 (2)").Name = "Format"
+    Sheets("Format").Select
+    
+'Step UnMerge
+    Cells.Select
+        Selection.UnMerge
+ 
+'Step Delete first rows
+    Rows("1:16").Select
+    Selection.Delete Shift:=xlUp
+
+'Step EmptyRows
+    Cells.Select
+    Selection.AutoFilter
+    ActiveSheet.Range("A1:AA20000").AutoFilter Field:=1, Criteria1:="="
+    Range("A3").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Rows("2:20000").Select
+    Selection.Delete Shift:=xlUp
+    Selection.AutoFilter
+    
+'Step Delete reference at the bottom
+    Range("A3").Select
+    Selection.End(xlDown).Select
+    Selection.ClearContents
+    
+'Step EmptyColums
+'  Dim c As Range, EmptyColumns As Long, e As Long
+'  Set c = ActiveSheet.Range("A1:AA20000")
+'  EmptyColumns = c.Columns.Count
+'  For e = EmptyColumns To 1 Step (-1)
+'    If WorksheetFunction.CountA(c.Columns(e)) = 0 Then c.Columns(e).Delete
+'  Next
+
+'Step Remove Columns
+    Columns("B:B").Select
+    Selection.Delete Shift:=xlToLeft
+    Columns("D:H").Select
+    Selection.Delete Shift:=xlToLeft
+    Columns("E:F").Select
+    Selection.Delete Shift:=xlToLeft
+    Columns("F:F").Select
+    Selection.Delete Shift:=xlToLeft
+    Columns("K:K").Select
+    Selection.Delete Shift:=xlToLeft
+
+'Step InsertRow
+Range("A2").EntireRow.Insert
+
+'Step Shifting Right
+  Dim r As Range, right As Long, i As Long
+  Set r = ActiveSheet.Range("F:F")
+  right = r.Rows.Count
+  For i = right To 1 Step (-1)
+    Range("F3").Select
+    Selection.End(xlDown).Select
+    Range(Selection, ActiveCell.Offset(0, 2)).Select
+      If WorksheetFunction.CountA(Selection) = 0 Then
+        Exit For
+      Else
+        Selection.Cut
+        ActiveCell.Offset(0, 1).Select
+        ActiveSheet.Paste
+      End If
+  Next
+    Columns("F:F").Select
+    Selection.Delete Shift:=xlToLeft
+
+'Step Shifting Left
+  Dim l As Range, left As Long, j As Long
+  Set l = ActiveSheet.Range("F:F")
+  left = l.Rows.Count
+  For j = left To 1 Step (-1)
+    Range("F3").Select
+    Selection.End(xlDown).Select
+    ActiveCell.Offset(1, 1).Select
+    Range(Selection, ActiveCell.Offset(0, 2)).Select
+      If WorksheetFunction.CountA(Selection) = 0 Then
+        Exit For
+      Else
+        Selection.Cut
+        ActiveCell.Offset(0, -1).Select
+        ActiveSheet.Paste
+      End If
+  Next
+
+'Step totals
+    Range("J3").Select
+    ActiveSheet.Cells(ActiveSheet.Rows.Count, Selection.Column).End(xlUp).Select
+    ActiveCell.Offset(1, -1).Select
+    ActiveCell.FormulaR1C1 = "=SUM(R[" & lastrow - 1 & "]C:R3C9)"
+    ActiveCell.Offset(0, -1).Select
+    ActiveCell.FormulaR1C1 = "=SUM(R[" & lastrow - 1 & "]C:R3C8)"
+
+'Step check
+    ActiveCell.Offset(0, 2).Select
+    ActiveCell.FormulaR1C1 = "=(R1C10+RC[-2]-RC[-1]-R[-1]C)"
+    ActiveCell.Select
+    With Selection.Font
+        .Color = -16776961
+        .TintAndShade = 0
+    End With
+
+'Step header
+Range("A2").Value = "Date"
+Range("B2").Value = "Type1"
+Range("C2").Value = "Document"
+Range("D2").Value = "Description1"
+Range("E2").Value = "Description2"
+Range("F2").Value = "Type2"
+Range("G2").Value = "Sign"
+Range("H2").Value = "Debit"
+Range("I2").Value = "Credit"
+Range("J2").Value = "Closing"
+
+'Step Final Formating
+    Cells.Select
+    With Selection.Font
+        .Name = "Arial"
+        .Strikethrough = False
+        .Superscript = False
+        .Subscript = False
+        .OutlineFont = False
+        .Shadow = False
+        .Underline = xlUnderlineStyleNone
+        .TintAndShade = 0
+        .ThemeFont = xlThemeFontNone
+    End With
+    With Selection.Font
+        .Name = "Arial"
+        .Size = 10
+        .Strikethrough = False
+        .Superscript = False
+        .Subscript = False
+        .OutlineFont = False
+        .Shadow = False
+        .Underline = xlUnderlineStyleNone
+        .TintAndShade = 0
+        .ThemeFont = xlThemeFontNone
+    End With
+    With Selection
+        .VerticalAlignment = xlTop
+        .WrapText = False
+        .Orientation = 0
+        .AddIndent = False
+        .ShrinkToFit = False
+        .MergeCells = False
+    End With
+    ActiveWindow.Zoom = 80
+    Cells.EntireColumn.AutoFit
+    
+'Step headings fortmat
+    Range("A2").Select
+    Range(Selection, Selection.End(xlToRight)).Select
+    Range(Selection, Selection.End(xlToRight)).Select
+    Range(Selection, Selection.End(xlToLeft)).Select
+    Rows("2:2").Select
+    Selection.Font.Bold = False
+    Selection.Font.Bold = True
+    With Selection
+        .HorizontalAlignment = xlCenter
+        .VerticalAlignment = xlTop
+        .WrapText = False
+        .Orientation = 0
+        .AddIndent = False
+        .IndentLevel = 0
+        .ShrinkToFit = False
+        .ReadingOrder = xlContext
+        .MergeCells = False
+    End With
+    Rows("1:1").Select
+    Selection.Font.Bold = False
+
+'Step comma numbers
+    Columns("H:J").Select
+    Selection.Style = "Comma"
+
+'Step repeating opening balance
+    Range("F1:I1").Select
+    Selection.ClearContents
+    
+'Step autofit
+    Cells.Select
+    Cells.EntireColumn.AutoFit
+    Cells.EntireRow.AutoFit
+
+End Sub
