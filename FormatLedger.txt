@@ -1,21 +1,34 @@
 Sub FormatLedger()
+'For Visma7 report: "General ledger with comments (transaction-specific)"
 
-'Step Copy Sheet1
+'1. Step Copy Sheet1
     Sheets("Sheet1").Select
     Sheets("Sheet1").Copy Before:=Sheets(1)
     Sheets("Sheet1 (2)").Select
     Sheets("Sheet1 (2)").Name = "Format"
     Sheets("Format").Select
     
-'Step UnMerge
+'2. Step UnMerge
     Cells.Select
         Selection.UnMerge
- 
-'Step Delete first rows
+        
+'3. Add apostrophe to date cells
+    Range("K5").Select
+    ActiveCell.Value = "'" & ActiveCell.Value
+    Range("N5").Select
+    ActiveCell.Value = "'" & ActiveCell.Value
+  
+'4. Copy date period
+    Range("J17").Select
+    ActiveCell.Value = "=R[-12]C[1]&"" - ""&R[-12]C[4]"
+    Selection.Copy
+    Selection.PasteSpecial Paste:=xlPasteValues
+           
+'5. Step Delete first rows
     Rows("1:16").Select
     Selection.Delete Shift:=xlUp
 
-'Step EmptyRows
+'6. Step EmptyRows
     Cells.Select
     Selection.AutoFilter
     ActiveSheet.Range("A1:AA20000").AutoFilter Field:=1, Criteria1:="="
@@ -25,12 +38,12 @@ Sub FormatLedger()
     Selection.Delete Shift:=xlUp
     Selection.AutoFilter
     
-'Step Delete reference at the bottom
+'7. Step Delete reference at the bottom
     Range("A3").Select
     Selection.End(xlDown).Select
     Selection.ClearContents
     
-'Step EmptyColums
+'Step Remove EmptyColums
 '  Dim c As Range, EmptyColumns As Long, e As Long
 '  Set c = ActiveSheet.Range("A1:AA20000")
 '  EmptyColumns = c.Columns.Count
@@ -38,7 +51,7 @@ Sub FormatLedger()
 '    If WorksheetFunction.CountA(c.Columns(e)) = 0 Then c.Columns(e).Delete
 '  Next
 
-'Step Remove Columns
+'8. Step Remove Columns
     Columns("B:B").Select
     Selection.Delete Shift:=xlToLeft
     Columns("D:H").Select
@@ -50,10 +63,10 @@ Sub FormatLedger()
     Columns("K:K").Select
     Selection.Delete Shift:=xlToLeft
 
-'Step InsertRow
-Range("A2").EntireRow.Insert
+'9. Step InsertRow
+    Range("A2").EntireRow.Insert
 
-'Step Shifting Right
+'10. Step Shifting Right
   Dim r As Range, right As Long, i As Long
   Set r = ActiveSheet.Range("F:F")
   right = r.Rows.Count
@@ -72,7 +85,7 @@ Range("A2").EntireRow.Insert
     Columns("F:F").Select
     Selection.Delete Shift:=xlToLeft
 
-'Step Shifting Left
+'11. Step Shifting Left
   Dim l As Range, left As Long, j As Long
   Set l = ActiveSheet.Range("F:F")
   left = l.Rows.Count
@@ -90,7 +103,7 @@ Range("A2").EntireRow.Insert
       End If
   Next
 
-'Step totals
+'12. Step totals
     Range("J3").Select
     ActiveSheet.Cells(ActiveSheet.Rows.Count, Selection.Column).End(xlUp).Select
     ActiveCell.Offset(1, -1).Select
@@ -98,7 +111,7 @@ Range("A2").EntireRow.Insert
     ActiveCell.Offset(0, -1).Select
     ActiveCell.FormulaR1C1 = "=SUM(R[" & lastrow - 1 & "]C:R3C8)"
 
-'Step check
+'13. Step check
     ActiveCell.Offset(0, 2).Select
     ActiveCell.FormulaR1C1 = "=(R1C10+RC[-2]-RC[-1]-R[-1]C)"
     ActiveCell.Select
@@ -107,19 +120,19 @@ Range("A2").EntireRow.Insert
         .TintAndShade = 0
     End With
 
-'Step header
-Range("A2").Value = "Date"
-Range("B2").Value = "Type1"
-Range("C2").Value = "Document"
-Range("D2").Value = "Description1"
-Range("E2").Value = "Description2"
-Range("F2").Value = "Type2"
-Range("G2").Value = "Sign"
-Range("H2").Value = "Debit"
-Range("I2").Value = "Credit"
-Range("J2").Value = "Closing"
+'14. Step header
+    Range("A2").Value = "Date"
+    Range("B2").Value = "Type1"
+    Range("C2").Value = "Document"
+    Range("D2").Value = "Description1"
+    Range("E2").Value = "Description2"
+    Range("F2").Value = "Type2"
+    Range("G2").Value = "Sign"
+    Range("H2").Value = "Debit"
+    Range("I2").Value = "Credit"
+    Range("J2").Value = "Closing"
 
-'Step Final Formating
+'15. Step Final Formating
     Cells.Select
     With Selection.Font
         .Name = "Arial"
@@ -155,7 +168,7 @@ Range("J2").Value = "Closing"
     ActiveWindow.Zoom = 80
     Cells.EntireColumn.AutoFit
     
-'Step headings fortmat
+'16. Step headings fortmat
     Range("A2").Select
     Range(Selection, Selection.End(xlToRight)).Select
     Range(Selection, Selection.End(xlToRight)).Select
@@ -177,15 +190,15 @@ Range("J2").Value = "Closing"
     Rows("1:1").Select
     Selection.Font.Bold = False
 
-'Step comma numbers
+'17. Step comma numbers
     Columns("H:J").Select
     Selection.Style = "Comma"
 
-'Step repeating opening balance
+'18. Step repeating opening balance
     Range("F1:I1").Select
     Selection.ClearContents
     
-'Step autofit
+'19. Step autofit
     Cells.Select
     Cells.EntireColumn.AutoFit
     Cells.EntireRow.AutoFit
